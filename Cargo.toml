@@ -1,0 +1,21 @@
+[package]
+name = "arch-testing"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/levicook/arch-testing"
+
+[dependencies]
+# Core Arch Network dependencies
+arch_program = { git = "ssh://git@github.com/levicook/arch-network.git", package = "arch_program" }
+arch_sdk = { git = "ssh://git@github.com/levicook/arch-network.git", package = "arch_sdk" }
+
+# External dependencies
+anyhow = "1"
+backoff = { version = "0.4.0", features = ["futures", "tokio"] }
+bitcoincore-rpc = "0.19"
+testcontainers = "0.25"
+titan-client = "0.1"
+tokio = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+bitcoin = "0.32.5"
