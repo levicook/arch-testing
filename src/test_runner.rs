@@ -1,7 +1,7 @@
 use std::future::Future;
 
 use anyhow::{Context, Result, anyhow};
-use arch_sdk::{ArchRpcClient, AsyncArchRpcClient};
+use arch_sdk::{ArchRpcClient, AsyncArchRpcClient, ProgramDeployer};
 use bitcoin::Network;
 use tokio::time::timeout;
 
@@ -59,12 +59,9 @@ impl TestRunner {
         }
     }
 
-    // fn build_async_program_deployer(&self) -> Result<AsyncProgramDeployer> {
-    //     Ok(AsyncProgramDeployer::new(
-    //         &self.get_rpc_url()?,
-    //         Network::Regtest,
-    //     ))
-    // }
+    fn build_program_deployer(&self) -> Result<ProgramDeployer> {
+        Ok(ProgramDeployer::new(&self.get_rpc_url()?, Network::Regtest))
+    }
 
     fn build_async_arch_rpc_client(&self) -> Result<AsyncArchRpcClient> {
         Ok(AsyncArchRpcClient::new(&self.get_rpc_url()?))
@@ -145,8 +142,7 @@ impl TestRunner {
         let ctx = TestContext::new(
             self.build_async_arch_rpc_client()?,
             self.build_arch_rpc_client()?,
-            // self.build_async_program_deployer()?,
-            Network::Regtest,
+            self.build_program_deployer()?,
         );
 
         match timeout(test_timeout, test_fn(ctx)).await {

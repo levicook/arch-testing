@@ -12,10 +12,10 @@ arch_sdk = { git = "ssh://git@github.com/levicook/arch-network.git", package = "
 # External dependencies
 anyhow = "1"
 backoff = { version = "0.4.0", features = ["futures", "tokio"] }
+bitcoin = "0.32.5"
 bitcoincore-rpc = "0.19"
 testcontainers = "0.25"
 titan-client = "0.1"
 tokio = "1"
 tracing = "0.1"
 tracing-subscriber = "0.3"
-bitcoin = "0.32.5"

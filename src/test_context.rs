@@ -3,8 +3,8 @@ use std::sync::Arc;
 use anyhow::Result;
 use arch_program::{pubkey::Pubkey, sanitized::ArchMessage, system_instruction};
 use arch_sdk::{
-    ArchRpcClient, AsyncArchRpcClient, ProcessedTransaction, RuntimeTransaction, Status,
-    build_and_sign_transaction, generate_new_keypair,
+    ArchRpcClient, AsyncArchRpcClient, ProcessedTransaction, ProgramDeployer, RuntimeTransaction,
+    Status, build_and_sign_transaction, generate_new_keypair,
 };
 use bitcoin::{Address, Network, key::Keypair};
 use tokio::task::spawn_blocking;
@@ -13,12 +13,10 @@ pub struct TestContext {
     pub arch_async_rpc_client: AsyncArchRpcClient,
     pub network: Network,
 
-    // pub program_deployer: AsyncProgramDeployer,
-    //
-    // can't be used in an async context:
-    // reqwest starts a new runtime on its own. lol. sob. fml.
-    // wrapped in an Arc to support spawn_blocking helpers. sob.
-    // Please _do not pub_ this field:
+    // Please _do not pub_ these fields, because they can't be used well in an async context.
+    // we'll keep all the spawn_blocking calls in this file until we have proper async clients.
+    // (aka, hide the ugly / keep the ugly in one place)
+    program_deployer: Arc<ProgramDeployer>,
     arch_rpc_client: Arc<ArchRpcClient>,
 }
 
@@ -26,12 +24,13 @@ impl TestContext {
     pub fn new(
         arch_async_rpc_client: AsyncArchRpcClient,
         arch_rpc_client: ArchRpcClient,
-        network: Network,
+        program_deployer: ProgramDeployer,
     ) -> Self {
         Self {
             arch_async_rpc_client,
             arch_rpc_client: Arc::new(arch_rpc_client),
-            network,
+            network: Network::Regtest,
+            program_deployer: Arc::new(program_deployer),
         }
     }
 
@@ -48,15 +47,22 @@ impl TestContext {
 
     pub async fn deploy_program(
         &self,
-        _program_kp: Keypair,
-        _authority_kp: Keypair,
-        _elf_bytes: &[u8],
+        program_kp: Keypair,
+        authority_kp: Keypair,
+        elf_bytes: &[u8],
     ) -> anyhow::Result<Pubkey> {
-        todo!()
-        // self.program_deployer
-        //     .deploy_program(program_kp, authority_kp, elf_bytes)
-        //     .await
-        //     .map_err(|e| anyhow::anyhow!("Program deployment failed: {}", e))
+        let program_pubkey = Pubkey::from_slice(&program_kp.x_only_public_key().0.serialize());
+
+        let program_deployer = self.program_deployer.clone();
+        let elf_bytes = elf_bytes.to_vec();
+        spawn_blocking(move || {
+            program_deployer
+                .deploy_program_elf(program_kp, authority_kp, &elf_bytes)
+                .map_err(|e| anyhow::anyhow!("Program deployment failed: {}", e))
+        })
+        .await??;
+
+        Ok(program_pubkey)
     }
 
     pub fn generate_new_keypair(&self) -> (Keypair, Pubkey, Address) {
