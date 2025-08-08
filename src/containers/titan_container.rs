@@ -2,9 +2,9 @@ use std::time::Duration;
 
 use anyhow::{Context, Result};
 use testcontainers::{
-    ContainerAsync, GenericImage, ImageExt,
-    core::{ContainerPort, WaitFor, logs::LogFrame},
+    core::{logs::LogFrame, ContainerPort, WaitFor},
     runners::AsyncRunner,
+    ContainerAsync, GenericImage, ImageExt,
 };
 use titan_client::TitanClient;
 

@@ -1,8 +1,12 @@
 [package]
-name = "arch-testing"
+name = "arch_testing"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/levicook/arch-testing"
+
+[lib]
+name = "arch_testing"
+path = "src/lib.rs"
 
 [dependencies]
 # Core Arch Network dependencies
@@ -14,6 +18,7 @@ anyhow = "1"
 backoff = { version = "0.4.0", features = ["futures", "tokio"] }
 bitcoin = "0.32.5"
 bitcoincore-rpc = "0.19"
+hex = "0.4.3"
 testcontainers = "0.25"
 titan-client = "0.1"
 tokio = "1"

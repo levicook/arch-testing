@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use anyhow::{Context, Result};
 use arch_sdk::AsyncArchRpcClient;
-use backoff::{ExponentialBackoff, future::retry};
+use backoff::{future::retry, ExponentialBackoff};
 use testcontainers::{
-    ContainerAsync, GenericImage, ImageExt,
-    core::{ContainerPort, logs::LogFrame},
+    core::{logs::LogFrame, ContainerPort},
     runners::AsyncRunner,
+    ContainerAsync, GenericImage, ImageExt,
 };
 
 use super::titan_container::TitanContainerConfig;

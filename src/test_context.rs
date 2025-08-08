@@ -3,10 +3,10 @@ use std::sync::Arc;
 use anyhow::Result;
 use arch_program::{pubkey::Pubkey, sanitized::ArchMessage, system_instruction};
 use arch_sdk::{
-    ArchRpcClient, AsyncArchRpcClient, ProcessedTransaction, ProgramDeployer, RuntimeTransaction,
-    Status, build_and_sign_transaction, generate_new_keypair,
+    build_and_sign_transaction, generate_new_keypair, ArchRpcClient, AsyncArchRpcClient,
+    ProcessedTransaction, ProgramDeployer, RuntimeTransaction, Status,
 };
-use bitcoin::{Address, Network, key::Keypair};
+use bitcoin::{key::Keypair, Address, Network};
 use tokio::task::spawn_blocking;
 
 pub struct TestContext {
@@ -50,19 +50,27 @@ impl TestContext {
         program_kp: Keypair,
         authority_kp: Keypair,
         elf_bytes: &[u8],
-    ) -> anyhow::Result<Pubkey> {
+    ) -> anyhow::Result<()> {
         let program_pubkey = Pubkey::from_slice(&program_kp.x_only_public_key().0.serialize());
-
         let program_deployer = self.program_deployer.clone();
-        let elf_bytes = elf_bytes.to_vec();
-        spawn_blocking(move || {
+        let elf = elf_bytes.to_vec();
+
+        // write ELF to a temp file (no extra deps)
+        let tmp_dir = std::env::temp_dir();
+        let elf_path = tmp_dir.join(format!("deploy-{}.elf", hex::encode(program_pubkey.0)));
+        std::fs::write(&elf_path, &elf)?;
+
+        let elf_path_str = elf_path.to_string_lossy().to_string();
+        let program_name = hex::encode(program_pubkey.0);
+
+        tokio::task::spawn_blocking(move || {
             program_deployer
-                .deploy_program_elf(program_kp, authority_kp, &elf_bytes)
+                .try_deploy_program(program_name, program_kp, authority_kp, &elf_path_str)
                 .map_err(|e| anyhow::anyhow!("Program deployment failed: {}", e))
         })
         .await??;
 
-        Ok(program_pubkey)
+        Ok(())
     }
 
     pub fn generate_new_keypair(&self) -> (Keypair, Pubkey, Address) {

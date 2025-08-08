@@ -1,6 +1,6 @@
 use std::future::Future;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use arch_sdk::{ArchRpcClient, AsyncArchRpcClient, ProgramDeployer};
 use bitcoin::Network;
 use tokio::time::timeout;
@@ -11,7 +11,7 @@ use crate::{
         LocalValidatorContainerConfig, TitanContainer, TitanContainerConfig,
     },
     init_tracing,
-    test_config::{MAX_SETUP_TIMEOUT, MAX_TEST_TIMEOUT, TestRunnerConfig},
+    test_config::{TestRunnerConfig, MAX_SETUP_TIMEOUT, MAX_TEST_TIMEOUT},
     test_context::TestContext,
 };
 

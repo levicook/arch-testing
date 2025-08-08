@@ -1,12 +1,12 @@
 use std::time::Duration;
 
 use anyhow::{Context, Result};
-use backoff::{ExponentialBackoff, retry};
+use backoff::{retry, ExponentialBackoff};
 use bitcoincore_rpc::{Client, RpcApi};
 use testcontainers::{
-    ContainerAsync, GenericImage, ImageExt,
-    core::{ContainerPort, logs::LogFrame},
+    core::{logs::LogFrame, ContainerPort},
     runners::AsyncRunner,
+    ContainerAsync, GenericImage, ImageExt,
 };
 use tokio::task::spawn_blocking;
 
