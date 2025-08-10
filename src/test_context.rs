@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use arch_program::{pubkey::Pubkey, sanitized::ArchMessage, system_instruction};
+use arch_program::{hash::Hash, instruction::Instruction, pubkey::Pubkey, sanitized::ArchMessage, system_instruction};
 use arch_sdk::{
     build_and_sign_transaction, generate_new_keypair, ArchRpcClient, AsyncArchRpcClient,
     ProcessedTransaction, ProgramDeployer, RuntimeTransaction, Status,
@@ -124,8 +124,21 @@ impl TestContext {
         }
     }
 
+    pub async fn get_best_blockhash(&self) -> Result<Hash> {
+        let blockhash = self.arch_async_rpc_client.get_best_block_hash().await?;
+        Ok(blockhash.parse()?)
+    }
+
     pub async fn get_recent_blockhash(&self) -> Result<String> {
         Ok(self.arch_async_rpc_client.get_best_block_hash().await?)
+    }
+
+    pub async fn build_message(
+        &self,
+        instructions: &[Instruction],
+        payer: Option<Pubkey>,
+    ) -> Result<ArchMessage> {
+        Ok(ArchMessage::new(instructions, payer, self.get_best_blockhash().await?))
     }
 
     pub async fn build_and_sign_transaction(
