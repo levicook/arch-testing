@@ -77,6 +77,12 @@ impl TestContext {
         generate_new_keypair(self.network)
     }
 
+    pub async fn generate_funded_keypair(&self) -> Result<(Keypair, Pubkey, Address)> {
+        let (keypair, pubkey, address) = self.generate_new_keypair();
+        self.fund_keypair_with_faucet(&keypair).await?;
+        Ok((keypair, pubkey, address))
+    }
+
     /// Create an account with specific lamports (with UTXO anchoring)
     pub async fn create_account_with_lamports(
         &self,
