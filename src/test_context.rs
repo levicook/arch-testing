@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use arch_program::{hash::Hash, instruction::Instruction, pubkey::Pubkey, sanitized::ArchMessage, system_instruction};
+use arch_program::{
+    hash::Hash, instruction::Instruction, pubkey::Pubkey, sanitized::ArchMessage,
+    system_instruction,
+};
 use arch_sdk::{
     build_and_sign_transaction, generate_new_keypair, ArchRpcClient, AsyncArchRpcClient,
     ProcessedTransaction, ProgramDeployer, RuntimeTransaction, Status,
@@ -38,9 +41,7 @@ impl TestContext {
         let client = self.arch_rpc_client.clone();
         let keypair = keypair.clone();
 
-        let network = self.network.clone();
-        spawn_blocking(move || client.create_and_fund_account_with_faucet(&keypair, network))
-            .await??;
+        spawn_blocking(move || client.create_and_fund_account_with_faucet(&keypair)).await??;
 
         Ok(())
     }
@@ -138,7 +139,11 @@ impl TestContext {
         instructions: &[Instruction],
         payer: Option<Pubkey>,
     ) -> Result<ArchMessage> {
-        Ok(ArchMessage::new(instructions, payer, self.get_best_blockhash().await?))
+        Ok(ArchMessage::new(
+            instructions,
+            payer,
+            self.get_best_blockhash().await?,
+        ))
     }
 
     pub async fn build_and_sign_transaction(

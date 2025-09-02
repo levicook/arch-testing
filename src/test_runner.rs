@@ -59,16 +59,29 @@ impl TestRunner {
         }
     }
 
-    fn build_program_deployer(&self) -> Result<ProgramDeployer> {
-        Ok(ProgramDeployer::new(&self.get_rpc_url()?, Network::Regtest))
+    fn build_program_deployer(&self, config: &TestRunnerConfig) -> Result<ProgramDeployer> {
+        Ok(ProgramDeployer::new(&self.get_network_config(config)?))
     }
 
     fn build_async_arch_rpc_client(&self) -> Result<AsyncArchRpcClient> {
         Ok(AsyncArchRpcClient::new(&self.get_rpc_url()?))
     }
 
-    fn build_arch_rpc_client(&self) -> Result<ArchRpcClient> {
-        Ok(ArchRpcClient::new(&self.get_rpc_url()?))
+    fn build_arch_rpc_client(&self, config: &TestRunnerConfig) -> Result<ArchRpcClient> {
+        Ok(ArchRpcClient::new(&self.get_network_config(config)?))
+    }
+
+    fn get_network_config(&self, config: &TestRunnerConfig) -> Result<arch_sdk::Config> {
+        let validator = self.get_validator()?;
+        let bitcoin_config = BitcoinContainerConfig::from(config.clone());
+
+        Ok(arch_sdk::Config {
+            node_endpoint: bitcoin_config.local_network_rpc_url(),
+            node_username: bitcoin_config.rpc_user,
+            node_password: bitcoin_config.rpc_password,
+            network: Network::Regtest,
+            arch_node_url: validator.rpc_url(),
+        })
     }
 
     fn get_rpc_url(&self) -> Result<String> {
@@ -141,8 +154,8 @@ impl TestRunner {
 
         let ctx = TestContext::new(
             self.build_async_arch_rpc_client()?,
-            self.build_arch_rpc_client()?,
-            self.build_program_deployer()?,
+            self.build_arch_rpc_client(config)?,
+            self.build_program_deployer(config)?,
         );
 
         match timeout(test_timeout, test_fn(ctx)).await {

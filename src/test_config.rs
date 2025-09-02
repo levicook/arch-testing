@@ -101,3 +101,27 @@ impl From<TestRunnerConfig> for LocalValidatorContainerConfig {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_uses_proper_bitcoin_credentials() {
+        let config = TestRunnerConfig::new().expect("Failed to create test config");
+        let bitcoin_config = BitcoinContainerConfig::from(config);
+
+        // Verify these are not the old hardcoded values that were in get_network_config
+        assert_ne!(bitcoin_config.rpc_user, "bitcoin");
+        assert_ne!(bitcoin_config.rpc_password, "bitcoinpass");
+
+        // Verify they are the proper default values
+        assert_eq!(bitcoin_config.rpc_user, "bitcoind_username");
+        assert_eq!(bitcoin_config.rpc_password, "bitcoind_password");
+
+        // Verify the RPC URL is properly formatted
+        assert!(bitcoin_config
+            .local_network_rpc_url()
+            .starts_with("http://127.0.0.1:"));
+    }
+}
