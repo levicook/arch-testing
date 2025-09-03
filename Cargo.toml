@@ -10,8 +10,8 @@ path = "src/lib.rs"
 
 [dependencies]
 # Core Arch Network dependencies
-arch_program = "0.5.7"
-arch_sdk = "0.5.7"
+arch_program = "0.5.8"
+arch_sdk = "0.5.8"
 
 # External dependencies
 anyhow = "1"

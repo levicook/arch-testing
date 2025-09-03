@@ -13,7 +13,7 @@ use super::titan_container::TitanContainerConfig;
 
 pub const DEFAULT_CONTAINER_NAME: &str = "arch-testing-local-validator-container";
 pub const DEFAULT_IMAGE_NAME: &str = "ghcr.io/arch-network/local_validator";
-pub const DEFAULT_IMAGE_TAG: &str = "latest";
+pub const DEFAULT_IMAGE_TAG: &str = "0.5.8";
 pub const DEFAULT_RPC_PORT: u16 = 9002;
 pub const DEFAULT_WEBSOCKET_PORT: u16 = 29002;
 pub const DEFAULT_STARTUP_TIMEOUT: Duration = Duration::from_secs(60);
